@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFinanceira Solutions - Sistema de Auditoria</title>
+    <!-- Chart.js e PDF.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
+    <!-- SDKs do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --ouro: #d4af37;
+            --ouro-escuro: #aa8c2c;
+            --preto-fundo: #0b0c10;
+            --preto-card: #1f2833;
+            --cinza-texto: #c5c6c7;
+            --branco: #ffffff;
+            --verde-sucesso: #2ecc71;
+            --vermelho-alerta: #e74c3c;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--preto-fundo); color: var(--cinza-texto); margin: 0; padding: 0; }
+        header { background-color: #000000; border-bottom: 3px solid var(--ouro); padding: 25px; text-align: center; }
+        header h1 { color: var(--ouro); margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        header p { color: var(--branco); margin: 5px 0 0 0; }
+        
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .card { background-color: var(--preto-card); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
+        
+        h2 { color: var(--ouro); margin-top: 0; font-size: 1.4rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px; text-transform: uppercase; }
+        label { display: block; margin-bottom: 8px; color: var(--branco); font-weight: bold; font-size: 0.95rem; }
+        
+        input[type="text"], input[type="email"], select {
+            background-color: #151c24; color: var(--branco); border: 1px solid var(--ouro);
+            padding: 12px; border-radius: 6px; width: 100%; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box; outline: none;
+        }
+
+        .upload-area { border: 2px dashed var(--ouro); padding: 40px; border-radius: 8px; cursor: pointer; text-align: center; background: rgba(212, 175, 55, 0.02); }
+        
+        /* GRID DE RESULTADOS */
+        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .kpi-card { background: #151c24; padding: 20px; border-radius: 8px; border-left: 4px solid var(--ouro); }
+        .kpi-title { font-size: 0.8rem; text-transform: uppercase; color: #888; }
+        .kpi-value { font-size: 1.5rem; font-weight: bold; color: var(--branco); margin-top: 5px; }
+
+        .grid-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .alert-box { padding: 18px; border-radius: 8px; margin-bottom: 20px; line-height: 1.5; }
+        .alert-high { background-color: rgba(231, 76, 60, 0.1); border: 1px solid var(--vermelho-alerta); color: #ff7675; }
+        .alert-success { background-color: rgba(46, 204, 113, 0.1); border: 1px solid var(--verde-sucesso); color: #2ecc71; }
+        
+        .bloco-solucao { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
+        .col-solucao { padding: 20px; border-radius: 8px; }
+        .proceder { background-color: rgba(46, 204, 113, 0.05); border: 1px solid var(--verde-sucesso); }
+        .nao-proceder { background-color: rgba(231, 76, 60, 0.05); border: 1px solid var(--vermelho-alerta); }
+        .col-solucao h4 { margin-top: 0; text-transform: uppercase; color: var(--verde-sucesso); }
+        .nao-proceder h4 { color: var(--vermelho-alerta); }
+        .col-solucao ul { padding-left: 20px; margin: 0; }
+        .col-solucao li { margin-bottom: 10px; }
+
+        .btn-processar {
+            background: linear-gradient(135deg, var(--ouro), var(--ouro-escuro));
+            color: #000; border: none; padding: 15px 25px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; width: 100%; letter-spacing: 1px;
+        }
+
+        /* TELA DE BLOQUEIO / CADASTRO E PAGAMENTO */
+        .tela-bloqueio { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--preto-fundo); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .painel-bloqueio { background-color: var(--preto-card); border: 2px solid var(--ouro); border-radius: 12px; padding: 30px; max-width: 650px; width: 100%; box-shadow: 0px 10px 30px rgba(0,0,0,0.7); box-sizing: border-box; }
+        .painel-bloqueio h2 { color: var(--ouro); text-align: center; border: none; margin-bottom: 10px; }
+        
+        .layout-pagamento { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; align-items: start; }
+        @media (max-width: 600px) { .layout-pagamento { grid-template-columns: 1fr; } }
+        
+        .col-qrcode { text-align: center; background-color: #151c24; padding: 15px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.1); }
+        .qrcode-img { width: 180px; height: 180px; background-color: #fff; margin: 10px auto; display: block; border-radius: 4px; }
+        
+        .chave-pix { background-color: #0b0c10; border: 1px dashed var(--ouro); padding: 10px; border-radius: 6px; font-size: 0.85rem; color: var(--cinza-texto); font-weight: bold; margin-top: 10px; text-align: left; }
+        .pix-string { display: block; background: #1f2833; padding: 6px; border-radius: 4px; border: 1px solid #444; color: var(--ouro); font-family: monospace; font-size: 0.75rem; margin-top: 5px; word-break: break-all; user-select: all; }
+        
+        .escondido { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE BLOQUEIO, CADASTRO E PAGAMENTO PIX -->
+    <div id="tela-bloqueio" class="tela-bloqueio">
+        <div class="painel-bloqueio">
+            <h2 id="status-titulo">🔒 Controle de Acesso - AFinanceira Solutions</h2>
+            <p id="status-mensagem" style="text-align: center;">Aguarde, validando suas credenciais de segurança...</p>
+            
+            <div id="bloco-pagamento-cadastro" class="escondido">
+                <p style="text-align: center; margin-bottom: 20px;">Este link de auditoria forense está expirado ou não possui chaves de acesso ativas. O sistema permanece aberto por apenas 24 horas pós-liberação.</p>
+                
+                <div class="layout-pagamento">
+                    <!-- COLUNA 1: QR CODE E CHAVE PIX COPIA E COLA -->
+                    <div class="col-qrcode">
+                        <span style="color: var(--ouro); font-weight: bold; display: block; margin-bottom: 5px;">1. ESCANEIE O PIX</span>
+                        <p style="font-size: 0.85rem; margin: 0 0 10px 0;">Valor da Análise: <strong>R$ 49,99</strong></p>
+                        
+                        <!-- GERADOR AUTOMÁTICO DE QR CODE VIA API COM SUA STRING PIX -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126400014BR.GOV.BCB.PIX0118pa445289@gmail.com520400005303986540549.995802BR5919Paloma Araujo Alves6009SAO PAULO61080540900062240520FPjqZZc1Ve9wzr96jrr063049A69" alt="QR Code Pix" class="qrcode-img">
+                        
+                        <div class="chave-pix">
+                            <strong>Pix Copia e Cola (Clique três vezes para copiar tudo):</strong>
+                            <span class="pix-string">00020126400014BR.GOV.BCB.PIX0118pa445289@gmail.com520400005303986540549.995802BR5919Paloma Araujo Alves6009SAO PAULO61080540900062240520FPjqZZc1Ve9wzr96jrr063049A69</span>
+                        </div>
+                    </div>
+
+                    <!-- COLUNA 2: FORMULÁRIO DE CADASTRO -->
+                    <div class="col-cadastro">
+                        <span style="color: var(--ouro); font-weight: bold; display: block; margin-bottom: 15px;">2. COLOQUE SEUS DADOS</span>
+                        <form id="form-cadastro" onsubmit="salvarSolicitacaoCadastro(event)">
+                            <label for="cad-nome">Nome Completo:</label>
+                            <input type="text" id="cad-nome" placeholder="Ex: João Silva" required>
+
+                            <label for="cad-whatsapp">WhatsApp (com DDD):</label>
+                            <input type="text" id="cad-whatsapp" placeholder="Ex: 11999998888" required>
+
+                            <label for="cad-email">E-mail Cadastrado:</label>
+                            <input type="email" id="cad-email" placeholder="Ex: joao@email.com" required>
+
+                            <button type="submit" class="btn-processar" style="margin-top: 10px;">Enviar Comprovante</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL DO SISTEMA DE AUDITORIA (SÓ ABRE SE LIBERADO) -->
+    <div id="conteudo-sistema" class="escondido">
+        <header>
+            <h1>AFinanceira Solutions</h1>
+            <p>Auditoria Forense de Banca, Diagnóstico de Gargalos e Soluções Financeiras</p>
+        </header>
+
+        <div class="container">
+            <!-- PAINEL DE UPLOAD -->
+            <div class="card" id="painel-upload">
+                <h2>📊 Análise Forense de Relatórios Operacionais</h2>
+                <p>Insira arquivos nos formatos PDF, CSV ou Excel exportados diretamente das plataformas legalizadas.</p>
+                
+                <label for="plataforma">1. Plataforma emissora do documento:</label>
+                <select id="plataforma">
+                    <option value="bet365">Bet365 (Histórico Unificado)</option>
+                    <option value="betano">Betano (Extrato de Transações)</option>
+                    <option value="outra">Outras Casas Regulamentadas</option>
+                </select>
+
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <p>🗂️ Clique aqui ou arraste o arquivo do histórico completo</p>
+                    <span id="nome-arquivo-selecionado" style="color: var(--ouro); font-weight: bold; margin-top: 10px;"></span>
+                </div>
+                <input type="file" id="file-input" accept=".pdf, .csv, .xlsx, .xls" onchange="document.getElementById('nome-arquivo-selecionado').innerText = 'Selecionado: ' + this.files[0].name">
+                
+                <button class="btn-processar" style="margin-top: 20px;" onclick="exibirDashboard()">Auditar Histórico Patrimonial</button>
+            </div>
+
+            <!-- RESULTADOS GRÁFICOS E DIRETRIZES -->
+            <div id="dashboard-resultado" class="escondido">
+                <div class="card">
+                    <h2>📈 Contabilidade Absoluta do Arquivo</h2>
+                    <div class="grid-kpi">
+                        <div class="kpi-card"><div class="kpi-title">Total de Apostas / Giros</div><div class="kpi-value">1.420</div></div>
+                        <div class="kpi-card"><div class="kpi-title">Valor Total Gasto</div><div class="kpi-value" style="color: var(--vermelho-alerta);">R$ 14.250,00</div></div>
+                        <div class="kpi-card"><div class="kpi-title">Valor Total Ganho</div><div class="kpi-value" style="color: var(--verde-sucesso);">R$ 11.200,00</div></div>
+                        <div class="kpi-card"><div class="kpi-title">Resultado Líquido</div><div class="kpi-value" style="color: var(--vermelho-alerta);">- R$ 3.050,00</div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚠️ Diagnóstico Forense de Gargalos e Viabilidade</h2>
+                    <div class="alert-box alert-high">
+                        <strong>🚨 GARGALO OPERACIONAL: O DRENO DOS SLOTS E CASSINO (RTP REAL DE 41%):</strong><br>
+                        O documento comprova que a viabilidade de manutenção desta atividade é **NULA**. A margem do algoritmo drena o caixa de forma contínua, anulando os ganhos em mercados técnicos.
+                    </div>
+                </div>
+
+                <div class="grid-charts">
+                    <div class="card"><h2>📊 Distribuição Patrimonial por Setor (R$)</h2><canvas id="chartPatrimonial"></canvas></div>
+                    <div class="card"><h2>⏱️ Curva de Rendimento Financeiro da Banca</h2><canvas id="chartCurvaRendimento"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <h2>🎯 Parecer Executivo: Diretrizes e Soluções Estruturadas</h2>
+                    <div class="bloco-solucao">
+                        <div class="col-solucao proceder">
+                            <h4>🟢 COMO PROCEDER</h4>
+                            <ul>
+                                <li>Canalize 100% do capital para o mercado técnico de Escanteios Pré-Jogo.</li>
+                            </ul>
+                        </div>
+                        <div class="col-solucao nao-proceder">
+                            <h4>🔴 COMO NÃO PROCEDER</h4>
+                            <ul>
+                                <li>Fica expressamente proibido alocar qualquer valor em jogos de algoritmo puro.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÃO DO FIREBASE (INSIRA SEUS DADOS AQUI)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ==========================================
+        // SISTEMA DE SEGURANÇA E CONEXÃO
+        // ==========================================
+        function verificarAcessoFirebase() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const clienteID = urlParams.get('id');
+
+            if (!clienteID) {
+                exibirTelaPagamentoECadastro();
+                return;
+            }
+
+            db.collection("acessos").doc(clienteID).get().then((doc) => {
+                if (doc.exists) {
+                    const dados = doc.data();
+                    const dataPagamento = dados.horario_liberacao.toDate().getTime();
+                    const agora = new Date().getTime();
+                    const vinteQuatroHoras = 24 * 60 * 60 * 1000;
+
+                    if (agora - dataPagamento < vinteQuatroHoras) {
+                        // ACESSO AUTORIZADO!
+                        document.getElementById("tela-bloqueio").classList.add("escondido");
+                        document.getElementById("conteudo-sistema").classList.remove("escondido");
+                    } else {
+                        exibirTelaPagamentoECadastro(); // Expirado
+                    }
+                } else {
+                    exibirTelaPagamentoECadastro(); // Não cadastrado
+                }
+            }).catch((error) => {
+                console.error("Erro na checagem:", error);
+                exibirTelaPagamentoECadastro();
+            });
+        }
+
+        function exibirTelaPagamentoECadastro() {
+            document.getElementById("status-titulo").innerText = "🔒 Acesso Restrito / Expirado";
+            document.getElementById("status-mensagem").classList.add("escondido");
+            document.getElementById("bloco-pagamento-cadastro").classList.remove("escondido");
+        }
+
+        function salvarSolicitacaoCadastro(event) {
+            event.preventDefault();
+            
+            const nome = document.getElementById("cad-nome").value;
+            const whatsapp = document.getElementById("cad-whatsapp").value;
+            const email = document.getElementById("cad-email").value;
+
+            const idGerado = nome.toLowerCase().replace(/\s+/g, '') + Math.floor(1000 + Math.random() * 9000);
+
+            db.collection("solicitacoes_cadastro").doc(idGerado).set({
+                nome: nome,
+                whatsapp: whatsapp,
+                email: email,
+                data_solicitacao: firebase.firestore.FieldValue.serverTimestamp(),
+                status: "Aguardando Confirmação Pix"
+            })
+            .then(() => {
+                alert("Cadastro realizado com sucesso! Assim que o Pix for compensado, nossa equipe ativará o seu painel e enviará o link definitivo de 24 horas no seu WhatsApp.");
+                document.getElementById("form-cadastro").reset();
+            })
+            .catch((error) => {
+                alert("Erro ao enviar dados. Verifique a conexão.");
+                console.error("Erro:", error);
+            });
+        }
+
+        window.onload = verificarAcessoFirebase;
+
+        // ==========================================
+        // CÓDIGO DA AUDITORIA (GRÁFICOS)
+        // ==========================================
+        function exibirDashboard() {
+            document.getElementById("painel-upload").classList.add("escondido");
+            document.getElementById("dashboard-resultado").classList.remove("escondido");
+            renderizarGraficosForense();
+        }
+
+        function renderizarGraficosForense() {
+            const ctx1 = document.getElementById('chartPatrimonial').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Futebol (Escanteios)', 'Slots / Cassino'],
+                    datasets: [
+                        { label: 'Gasto', data: [3500, 4000], backgroundColor: 'rgba(231, 76, 60, 0.6)' },
+                        { label: 'Ganho', data: [4074, 1600], backgroundColor: 'rgba(46, 204, 113, 0.6)' }
+                    ]
+                },
+                options: { responsive: true }
+            });
+
+            const ctx2 = document.getElementById('chartCurvaRendimento').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Início', 'Fase 1', 'Fase 2', 'Fim'],
+                    datasets: [{ label: 'Saldo Líquido (R$)', data: [0, 574, -2100, -3050], borderColor: '#d4af37', backgroundColor: 'rgba(212, 175, 55, 0.1)', fill: true }]
+                },
+                options: { responsive: true }
+            });
+        }
+    </script>
+</body>
+</html>
