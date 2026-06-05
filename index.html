@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     
-    <!-- SDKs do Firebase -->
+    <!-- SDKs do Firebase (Versão estável e compatível com a estrutura) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -97,21 +97,21 @@
                 <p style="text-align: center; margin-bottom: 20px;">Este link de auditoria forense está expirado ou não possui chaves de acesso ativas. O sistema permanece aberto por apenas 24 horas pós-liberação.</p>
                 
                 <div class="layout-pagamento">
-                    <!-- COLUNA 1: QR CODE E CHAVE PIX COPIA E COLA -->
+                    <!-- QR CODE E CHAVE PIX COPIA E COLA -->
                     <div class="col-qrcode">
                         <span style="color: var(--ouro); font-weight: bold; display: block; margin-bottom: 5px;">1. ESCANEIE O PIX</span>
                         <p style="font-size: 0.85rem; margin: 0 0 10px 0;">Valor da Análise: <strong>R$ 49,99</strong></p>
                         
-                        <!-- GERADOR AUTOMÁTICO DE QR CODE VIA API COM SUA STRING PIX -->
+                        <!-- GERADOR AUTOMÁTICO DE QR CODE -->
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126400014BR.GOV.BCB.PIX0118pa445289@gmail.com520400005303986540549.995802BR5919Paloma Araujo Alves6009SAO PAULO61080540900062240520FPjqZZc1Ve9wzr96jrr063049A69" alt="QR Code Pix" class="qrcode-img">
                         
                         <div class="chave-pix">
-                            <strong>Pix Copia e Cola (Clique três vezes para copiar tudo):</strong>
+                            <strong>Pix Copia e Cola:</strong>
                             <span class="pix-string">00020126400014BR.GOV.BCB.PIX0118pa445289@gmail.com520400005303986540549.995802BR5919Paloma Araujo Alves6009SAO PAULO61080540900062240520FPjqZZc1Ve9wzr96jrr063049A69</span>
                         </div>
                     </div>
 
-                    <!-- COLUNA 2: FORMULÁRIO DE CADASTRO -->
+                    <!-- FORMULÁRIO DE CADASTRO -->
                     <div class="col-cadastro">
                         <span style="color: var(--ouro); font-weight: bold; display: block; margin-bottom: 15px;">2. COLOQUE SEUS DADOS</span>
                         <form id="form-cadastro" onsubmit="salvarSolicitacaoCadastro(event)">
@@ -132,7 +132,7 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL DO SISTEMA DE AUDITORIA (SÓ ABRE SE LIBERADO) -->
+    <!-- CONTEÚDO PRINCIPAL DO SISTEMA DE AUDITORIA -->
     <div id="conteudo-sistema" class="escondido">
         <header>
             <h1>AFinanceira Solutions</h1>
@@ -208,22 +208,22 @@
     </div>
 
     <script>
-    // ==========================================
-    // CONFIGURAÇÃO DO FIREBASE (ATUALIZADO REAIS)
-    // ==========================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyAN-8KC8_WjptE6v6TzuNGdIxpGOIG8vpQ",
-        authDomain: "auditoriaigaming.firebaseapp.com",
-        databaseURL: "https://auditoriaigaming-default-rtdb.firebaseio.com",
-        projectId: "auditoriaigaming",
-        storageBucket: "auditoriaigaming.firebasestorage.app",
-        messagingSenderId: "273140516999",
-        appId: "1:273140516999:web:9b3dd1703bd1731b30d022"
-    };
+        // ==========================================
+        // CONFIGURAÇÃO REAL E EXCLUSIVA DO FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAN-8KC8_WjptE6v6TzuNGdIxpGOIG8vpQ",
+            authDomain: "auditoriaigaming.firebaseapp.com",
+            databaseURL: "https://auditoriaigaming-default-rtdb.firebaseio.com",
+            projectId: "auditoriaigaming",
+            storageBucket: "auditoriaigaming.firebasestorage.app",
+            messagingSenderId: "273140516999",
+            appId: "1:273140516999:web:9b3dd1703bd1731b30d022"
+        };
 
-    // Inicialização correta usando a biblioteca Compat já presente no seu cabeçalho
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        // Inicialização utilizando o SDK estruturado no topo do arquivo
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         // ==========================================
         // SISTEMA DE SEGURANÇA E CONEXÃO
@@ -237,25 +237,34 @@
                 return;
             }
 
+            // Realiza a leitura na coleção correta ("acessos")
             db.collection("acessos").doc(clienteID).get().then((doc) => {
                 if (doc.exists) {
                     const dados = doc.data();
+                    
+                    // Valida se o campo obrigatório correto existe no banco
+                    if (!dados.horario_liberacao) {
+                        console.error("Campo 'horario_liberacao' ausente no documento.");
+                        exibirTelaPagamentoECadastro();
+                        return;
+                    }
+
                     const dataPagamento = dados.horario_liberacao.toDate().getTime();
                     const agora = new Date().getTime();
                     const vinteQuatroHoras = 24 * 60 * 60 * 1000;
 
+                    // Validação do intervalo de 24 horas de acesso liberado
                     if (agora - dataPagamento < vinteQuatroHoras) {
-                        // ACESSO AUTORIZADO!
                         document.getElementById("tela-bloqueio").classList.add("escondido");
                         document.getElementById("conteudo-sistema").classList.remove("escondido");
                     } else {
-                        exibirTelaPagamentoECadastro(); // Expirado
+                        exibirTelaPagamentoECadastro(); // Excedeu o tempo limite
                     }
                 } else {
-                    exibirTelaPagamentoECadastro(); // Não cadastrado
+                    exibirTelaPagamentoECadastro(); // ID não existe no Firestore
                 }
             }).catch((error) => {
-                console.error("Erro na checagem:", error);
+                console.error("Erro na checagem de banco:", error);
                 exibirTelaPagamentoECadastro();
             });
         }
@@ -287,15 +296,15 @@
                 document.getElementById("form-cadastro").reset();
             })
             .catch((error) => {
-                alert("Erro ao enviar dados. Verifique a conexão.");
-                console.error("Erro:", error);
+                alert("Erro ao enviar dados. Verifique a conexão e as regras do banco.");
+                console.error("Erro de gravação:", error);
             });
         }
 
         window.onload = verificarAcessoFirebase;
 
         // ==========================================
-        // CÓDIGO DA AUDITORIA (GRÁFICOS)
+        // CÓDIGO DA AUDITORIA (GRÁFICOS E INTERAÇÕES)
         // ==========================================
         function exibirDashboard() {
             document.getElementById("painel-upload").classList.add("escondido");
