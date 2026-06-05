@@ -211,14 +211,24 @@
         // ==========================================
         // CONFIGURAÇÃO DO FIREBASE (INSIRA SEUS DADOS AQUI)
         // ==========================================
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            projectId: "SEU_PROJETO",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SEU_APP_ID"
-        };
+   // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAN-8KC8_WjptE6v6TzuNGdIxpGOIG8vpQ",
+  authDomain: "auditoriaigaming.firebaseapp.com",
+  databaseURL: "https://auditoriaigaming-default-rtdb.firebaseio.com",
+  projectId: "auditoriaigaming",
+  storageBucket: "auditoriaigaming.firebasestorage.app",
+  messagingSenderId: "273140516999",
+  appId: "1:273140516999:web:9b3dd1703bd1731b30d022"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
