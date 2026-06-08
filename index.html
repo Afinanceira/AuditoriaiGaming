@@ -12,26 +12,36 @@
     <style>
         :root { --ouro: #D4AF37; --fundo: #0a0a0a; --vermelho: #FF0000; --verde: #00FF00; --cinza: #1a1a1a; --cinza-claro: #2a2a2a; }
         
-        /* Configuração do fundo com marca d'água espelhada e suave */
+        /* Configuração do fundo corrigida: O corpo do site não é mais espelhado */
         body { 
             background-color: var(--fundo); 
-            background-image: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)), url('background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            transform: scaleX(-1); /* Espelha o fundo e o conteúdo */
             color: white; 
             font-family: 'Segoe UI', sans-serif; 
             padding: 20px; 
             text-align: center; 
+            margin: 0;
+            position: relative;
+            min-height: 100vh;
         }
 
-        /* Desfaz o espelhamento nos elementos de texto/cards para que fiquem legíveis */
-        .wrapper-conteudo, .card, script {
-            transform: scaleX(-1);
+        /* Pseudoelemento isolado para aplicar o fundo espelhado e muito suave (marca d'água) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.88)), url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transform: scaleX(-1); /* Espelha APENAS a imagem de fundo */
+            z-index: -1; /* Garante que fica atrás de todo o conteúdo */
         }
 
-        .card { border: 1px solid var(--ouro); padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto; background-color: rgba(13, 13, 13, 0.92); box-shadow: 0px 4px 25px rgba(212, 175, 55, 0.15); backdrop-filter: blur(5px); }
+        /* Interface limpa e sem bugs de inversão */
+        .card { border: 1px solid var(--ouro); padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto; background-color: rgba(13, 13, 13, 0.94); box-shadow: 0px 4px 25px rgba(212, 175, 55, 0.15); backdrop-filter: blur(5px); }
         .hidden { display: none; }
         .btn-processar { background: var(--ouro); color: black; padding: 15px 30px; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; font-size: 16px; transition: 0.3s; margin: 10px; }
         .btn-processar:hover { opacity: 0.8; }
@@ -54,116 +64,112 @@
 </head>
 <body>
 
-    <div class="wrapper-conteudo">
+    <div id="tela-bloqueio" class="card" style="margin-top: 50px;">
+        <div style="margin: 20px 0;">
+            <span style="font-size: 45px;">⚓</span>
+        </div>
+        <h1>Acesso Restrito</h1>
+        <p style="font-size: 18px; color: var(--ouro); font-weight: bold;">Auditoria Forense de Banca - AFinanceira Solutions</p>
+        <p style="color: #aaa; font-size: 14px; max-width: 500px; margin: auto; line-height: 1.5;">Mapeamento avançado de vulnerabilidades matemáticas, análise de turnovers e identificação de retenção forçada de software.</p>
+        <br>
+        <button class="btn-processar" onclick="window.location.href='https://wa.me/5583982052933?text=Ol%C3%A1,%20gostaria%20de%20liberar%20minha%20auditoria%20forense.'">
+            Solicitar Liberação via WhatsApp
+        </button>
+    </div>
 
-        <div id="tela-bloqueio" class="card" style="margin-top: 50px;">
-            <div style="margin: 20px 0;">
-                <span style="font-size: 45px;">⚓</span>
-            </div>
-            <h1>Acesso Restrito</h1>
-            <p style="font-size: 18px; color: var(--ouro); font-weight: bold;">Auditoria Forense de Banca - AFinanceira Solutions</p>
-            <p style="color: #aaa; font-size: 14px; max-width: 500px; margin: auto; line-height: 1.5;">Mapeamento avançado de vulnerabilidades matemáticas, análise de turnovers e identificação de retenção forçada de software.</p>
+    <div id="tela-painel" class="card hidden">
+        <h1>Painel de Análise Forense</h1>
+        
+        <div id="area-upload" style="border: 2px dashed var(--ouro); padding: 25px; margin-bottom: 20px; border-radius: 8px; background: rgba(17, 17, 17, 0.85);">
+            <h3>📥 Upload do Relatório Governamental da Banca</h3>
+            <p style="color: #ccc; font-size: 15px;">Insira o arquivo PDF exportado da plataforma para realizar o cruzamento de metadados.</p>
+            <input type="file" id="arquivo-pdf" accept=".pdf" style="margin-bottom: 15px; color: var(--ouro);">
             <br>
-            <button class="btn-processar" onclick="window.location.href='https://wa.me/5583982052933?text=Ol%C3%A1,%20gostaria%20de%20liberar%20minha%20auditoria%20forense.'">
-                Solicitar Liberação via WhatsApp
-            </button>
+            <button class="btn-processar" id="btn-analise" onclick="processarArquivoCliente()">Iniciar Auditoria Computacional</button>
         </div>
 
-        <div id="tela-painel" class="card hidden">
-            <h1>Painel de Análise Forense</h1>
+        <div id="resultados-auditoria" class="hidden">
             
-            <div id="area-upload" style="border: 2px dashed var(--ouro); padding: 25px; margin-bottom: 20px; border-radius: 8px; background: rgba(17, 17, 17, 0.85);">
-                <h3>📥 Upload do Relatório Governamental da Banca</h3>
-                <p style="color: #ccc; font-size: 15px;">Insira o arquivo PDF exportado da plataforma para realizar o cruzamento de metadados.</p>
-                <input type="file" id="arquivo-pdf" accept=".pdf" style="margin-bottom: 15px; color: var(--ouro);">
-                <br>
-                <button class="btn-processar" id="btn-analise" onclick="processarArquivoCliente()">Iniciar Auditoria Computacional</button>
+            <hr style="border-color: var(--ouro); margin: 30px 0;">
+            <h2>📊 Diagnóstico Forense de Resultados</h2>
+            
+            <div class="kpi-container">
+                <div class="kpi-box">
+                    <p style="margin: 0; color: #aaa; font-size: 13px;">Volume de Transações</p>
+                    <h3 id="kpi-volume" style="margin: 5px 0;">R$ 0,00</h3>
+                </div>
+                <div class="kpi-box">
+                    <p style="margin: 0; color: #aaa; font-size: 13px;">Resultado Líquido Apurado</p>
+                    <h3 id="kpi-resultado" style="margin: 5px 0;">R$ 0,00</h3>
+                </div>
+                <div class="kpi-box">
+                    <p style="margin: 0; color: #aaa; font-size: 13px;">Taxa de Entrega (RTP Real)</p>
+                    <h3 id="kpi-rtp" style="margin: 5px 0;">0%</h3>
+                </div>
+                <div class="kpi-box">
+                    <p style="margin: 0; color: #aaa; font-size: 13px;">Frequência de Ações / Min</p>
+                    <h3 id="kpi-overtrading" style="margin: 5px 0;">0.0</h3>
+                </div>
             </div>
 
-            <div id="resultados-auditoria" class="hidden">
-                
-                <hr style="border-color: var(--ouro); margin: 30px 0;">
-                <h2>📊 Diagnóstico Forense de Resultados</h2>
-                
-                <div class="kpi-container">
-                    <div class="kpi-box">
-                        <p style="margin: 0; color: #aaa; font-size: 13px;">Volume de Transações</p>
-                        <h3 id="kpi-volume" style="margin: 5px 0;">R$ 0,00</h3>
-                    </div>
-                    <div class="kpi-box">
-                        <p style="margin: 0; color: #aaa; font-size: 13px;">Resultado Líquido Apurado</p>
-                        <h3 id="kpi-resultado" style="margin: 5px 0;">R$ 0,00</h3>
-                    </div>
-                    <div class="kpi-box">
-                        <p style="margin: 0; color: #aaa; font-size: 13px;">Taxa de Entrega (RTP Real)</p>
-                        <h3 id="kpi-rtp" style="margin: 5px 0;">0%</h3>
-                    </div>
-                    <div class="kpi-box">
-                        <p style="margin: 0; color: #aaa; font-size: 13px;">Frequência de Ações / Min</p>
-                        <h3 id="kpi-overtrading" style="margin: 5px 0;">0.0</h3>
+            <div class="sub-secao">
+                <h3 style="margin-top: 0; color: var(--ouro);">🎛️ Auditoria de Margem de Software</h3>
+                <div class="rtp-comparativo">
+                    <span>RTP Prometido pela Casa:</span>
+                    <div class="rtp-barra-bg">
+                        <div class="rtp-barra-fill" style="width: 96%; background: var(--ouro);"></div>
+                        <span style="position: absolute; right: 10px; top: 0; font-size: 12px; color: black; font-weight: bold;">96%</span>
                     </div>
                 </div>
-
-                <div class="sub-secao">
-                    <h3 style="margin-top: 0; color: var(--ouro);">🎛️ Auditoria de Margem de Software</h3>
-                    <div class="rtp-comparativo">
-                        <span>RTP Prometido pela Casa:</span>
-                        <div class="rtp-barra-bg">
-                            <div class="rtp-barra-fill" style="width: 96%; background: var(--ouro);"></div>
-                            <span style="position: absolute; right: 10px; top: 0; font-size: 12px; color: black; font-weight: bold;">96%</span>
-                        </div>
-                    </div>
-                    <div class="rtp-comparativo">
-                        <span>RTP Real Entregue:</span>
-                        <div class="rtp-barra-bg">
-                            <div id="barra-rtp-real" class="rtp-barra-fill" style="width: 0%; background: var(--vermelho);"></div>
-                            <span id="txt-rtp-real" style="position: absolute; left: 10px; top: 0; font-size: 12px; color: white; font-weight: bold;">0%</span>
-                        </div>
-                    </div>
-                    <p id="alerta-rtp-texto" style="font-size: 14px; margin-top: 10px; color: #ccc; line-height: 1.4;"></p>
-                </div>
-
-                <div id="modulo-loop-recuperacao" class="loop-alerta hidden">
-                    <h3 style="margin-top:0; color: var(--vermelho);">⚠️ Detecção de Anomalia Comportamental: Loop de Recuperação</h3>
-                    <p id="detalhe-loop-recuperacao" style="margin-bottom:0; font-size: 14px; line-height: 1.5;"></p>
-                </div>
-
-                <div class="sub-secao">
-                    <h3 style="margin-top: 0; color: var(--ouro);">🕒 Cronoanálise Forense (Janelas de Performance)</h3>
-                    <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Cruzamento estatístico entre carimbos de data/hora do PDF e o comportamento do fluxo do servidor:</p>
-                    <div id="analise-horarios"></div>
-                </div>
-
-                <div class="sub-secao" style="text-align: center;">
-                    <h3 style="margin-top: 0; color: var(--ouro); text-align: left;">📉 Curva de Rendimento Patrimonial Semanal</h3>
-                    <div style="max-width: 100%; margin: auto;">
-                        <canvas id="graficoEvolucao"></canvas>
+                <div class="rtp-comparativo">
+                    <span>RTP Real Entregue:</span>
+                    <div class="rtp-barra-bg">
+                        <div id="barra-rtp-real" class="rtp-barra-fill" style="width: 0%; background: var(--vermelho);"></div>
+                        <span id="txt-rtp-real" style="position: absolute; left: 10px; top: 0; font-size: 12px; color: white; font-weight: bold;">0%</span>
                     </div>
                 </div>
-
-                <div class="sub-secao">
-                    <h3 style="margin-top: 0; color: var(--ouro);">⚔️ Vulnerabilidades Operacionais Localizadas</h3>
-                    <div id="lista-gargalos"></div>
-                </div>
-
-                <div class="sub-secao" style="border-color: var(--ouro);">
-                    <h3 style="margin-top: 0; color: var(--ouro);">🎮 Cenário de Exposição Interativo</h3>
-                    <div style="margin-bottom: 15px;">
-                        <p style="margin-top: 0; font-size: 14px; color: #aaa;">Termômetro Dinâmico de Exposição a Risco Corrente</p>
-                        <input type="range" id="termometro-risco" min="0" max="100" value="50" disabled style="width: 100%;">
-                        <p id="status-risco" style="font-weight: bold; font-size: 15px; margin: 5px 0;"></p>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                        <button class="btn-processar" onclick="alert('Simulador PvP Ativo: Calculando projeção estocástica para ciclos futuros...')">Rodar Arena de Duelo 30D</button>
-                        <div id="bolha-saldo" onclick="estourarBolha()" style="width: 60px; height: 60px; background: var(--ouro); border-radius: 50%; cursor: pointer; text-align: center; line-height: 60px; font-weight: bold; color: black; font-size: 11px; transition: 0.3s;">VOL. BOID</div>
-                    </div>
-                </div>
-                
-                <div id="parecer-executivo" style="margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 15px; line-height: 1.6; text-align: left;"></div>
-                
+                <p id="alerta-rtp-texto" style="font-size: 14px; margin-top: 10px; color: #ccc; line-height: 1.4;"></p>
             </div>
+
+            <div id="modulo-loop-recuperacao" class="loop-alerta hidden">
+                <h3 style="margin-top:0; color: var(--vermelho);">⚠️ Detecção de Anomalia Comportamental: Loop de Recuperação</h3>
+                <p id="detalhe-loop-recuperacao" style="margin-bottom:0; font-size: 14px; line-height: 1.5;"></p>
+            </div>
+
+            <div class="sub-secao">
+                <h3 style="margin-top: 0; color: var(--ouro);">🕒 Cronoanálise Forense (Janelas de Performance)</h3>
+                <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Cruzamento estatístico entre carimbos de data/hora do PDF e o comportamento do fluxo do servidor:</p>
+                <div id="analise-horarios"></div>
+            </div>
+
+            <div class="sub-secao" style="text-align: center;">
+                <h3 style="margin-top: 0; color: var(--ouro); text-align: left;">📉 Curva de Rendimento Patrimonial Semanal</h3>
+                <div style="max-width: 100%; margin: auto;">
+                    <canvas id="graficoEvolucao"></canvas>
+                </div>
+            </div>
+
+            <div class="sub-secao">
+                <h3 style="margin-top: 0; color: var(--ouro);">⚔️ Vulnerabilidades Operacionais Localizadas</h3>
+                <div id="lista-gargalos"></div>
+            </div>
+
+            <div class="sub-secao" style="border-color: var(--ouro);">
+                <h3 style="margin-top: 0; color: var(--ouro);">🎮 Cenário de Exposição Interativo</h3>
+                <div style="margin-bottom: 15px;">
+                    <p style="margin-top: 0; font-size: 14px; color: #aaa;">Termômetro Dinâmico de Exposição a Risco Corrente</p>
+                    <input type="range" id="termometro-risco" min="0" max="100" value="50" disabled style="width: 100%;">
+                    <p id="status-risco" style="font-weight: bold; font-size: 15px; margin: 5px 0;"></p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <button class="btn-processar" onclick="alert('Simulador PvP Ativo: Calculando projeção estocástica para ciclos futuros...')">Rodar Arena de Duelo 30D</button>
+                    <div id="bolha-saldo" onclick="estourarBolha()" style="width: 60px; height: 60px; background: var(--ouro); border-radius: 50%; cursor: pointer; text-align: center; line-height: 60px; font-weight: bold; color: black; font-size: 11px; transition: 0.3s;">VOL. BOID</div>
+                </div>
+            </div>
+            
+            <div id="parecer-executivo" style="margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 15px; line-height: 1.6; text-align: left;"></div>
+            
         </div>
-
     </div>
 
     <script>
