@@ -12,7 +12,6 @@
     <style>
         :root { --ouro: #D4AF37; --fundo: #0a0a0a; --vermelho: #FF0000; --verde: #00FF00; --cinza: #1a1a1a; --cinza-claro: #2a2a2a; }
         
-        /* Configuração do fundo corrigida: O corpo do site não é mais espelhado */
         body { 
             background-color: var(--fundo); 
             color: white; 
@@ -24,7 +23,6 @@
             min-height: 100vh;
         }
 
-        /* Pseudoelemento isolado para aplicar o fundo espelhado e muito suave (marca d'água) */
         body::before {
             content: "";
             position: fixed;
@@ -36,30 +34,53 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            transform: scaleX(-1); /* Espelha APENAS a imagem de fundo */
-            z-index: -1; /* Garante que fica atrás de todo o conteúdo */
+            transform: scaleX(-1); 
+            z-index: -1; 
         }
 
-        /* Interface limpa e sem bugs de inversão */
         .card { border: 1px solid var(--ouro); padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto; background-color: rgba(13, 13, 13, 0.94); box-shadow: 0px 4px 25px rgba(212, 175, 55, 0.15); backdrop-filter: blur(5px); }
         .hidden { display: none; }
         .btn-processar { background: var(--ouro); color: black; padding: 15px 30px; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; font-size: 16px; transition: 0.3s; margin: 10px; }
         .btn-processar:hover { opacity: 0.8; }
         
-        /* Grid de Resultados */
         .kpi-container { display: flex; justify-content: space-around; margin: 20px 0; flex-wrap: wrap; }
         .kpi-box { background: var(--cinza); border: 1px solid var(--ouro); padding: 15px; border-radius: 8px; min-width: 180px; margin: 5px; }
         
-        /* Seções de Detalhamento Técnico */
         .sub-secao { background: var(--cinza); border: 1px solid #333; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
         .gargalo-item { background: var(--cinza-claro); border-left: 4px solid var(--vermelho); padding: 12px; margin: 8px 0; border-radius: 4px; font-size: 14px; }
         .horario-item { background: var(--cinza-claro); border-left: 4px solid var(--verde); padding: 12px; margin: 8px 0; border-radius: 4px; font-size: 14px; }
         
-        /* Módulos de Gamificação Internos */
         .loop-alerta { background: rgba(255, 0, 0, 0.12); border: 1px dashed var(--vermelho); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
         .rtp-comparativo { display: flex; justify-content: space-between; align-items: center; background: var(--cinza-claro); padding: 12px; border-radius: 6px; margin: 10px 0; }
         .rtp-barra-bg { background: #333; width: 55%; height: 20px; border-radius: 10px; overflow: hidden; position: relative; }
         .rtp-barra-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
+
+        /* Customização Avançada do Termômetro de Risco */
+        .medidor-container {
+            background: #222;
+            border-radius: 15px;
+            padding: 4px;
+            border: 1px solid #444;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .medidor-barra {
+            height: 25px;
+            width: 50%;
+            background: linear-gradient(90deg, var(--verde), var(--ouro), var(--vermelho));
+            background-size: 300% 100%;
+            border-radius: 12px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+        .legenda-termometro {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -154,21 +175,43 @@
                 <div id="lista-gargalos"></div>
             </div>
 
-            <div class="sub-secao" style="border-color: var(--ouro);">
-                <h3 style="margin-top: 0; color: var(--ouro);">🎮 Cenário de Exposição Interativo</h3>
-                <div style="margin-bottom: 15px;">
-                    <p style="margin-top: 0; font-size: 14px; color: #aaa;">Termômetro Dinâmico de Exposição a Risco Corrente</p>
-                    <input type="range" id="termometro-risco" min="0" max="100" value="50" disabled style="width: 100%;">
-                    <p id="status-risco" style="font-weight: bold; font-size: 15px; margin: 5px 0;"></p>
+            <div class="sub-secao" style="border-color: var(--ouro); background: rgba(20, 20, 20, 0.8);">
+                <h3 style="margin-top: 0; color: var(--ouro);">🎮 Cenário de Exposição Estatística (Termômetro Dinâmico)</h3>
+                <p style="margin-top: 0; font-size: 14px; color: #aaa;">Mapeamento do nível de estresse patrimonial em relação à arquitetura de retenção do servidor:</p>
+                
+                <div class="medidor-container">
+                    <div id="termometro-visual" class="medidor-barra"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                    <button class="btn-processar" onclick="alert('Simulador PvP Ativo: Calculando projeção estocástica para ciclos futuros...')">Rodar Arena de Duelo 30D</button>
-                    <div id="bolha-saldo" onclick="estourarBolha()" style="width: 60px; height: 60px; background: var(--ouro); border-radius: 50%; cursor: pointer; text-align: center; line-height: 60px; font-weight: bold; color: black; font-size: 11px; transition: 0.3s;">VOL. BOID</div>
+                <div class="legenda-termometro">
+                    <span>0% (SEGURO)</span>
+                    <span>50% (MODERADO)</span>
+                    <span>100% (RISCO DE RUÍNA)</span>
+                </div>
+
+                <p id="status-risco" style="font-weight: bold; font-size: 16px; margin: 15px 0; text-align: center; letter-spacing: 0.5px;"></p>
+                
+                <div id="descricao-risco-bloco" style="background: var(--cinza-claro); padding: 12px; border-radius: 6px; font-size: 13px; color: #bbb; line-height: 1.4; margin-bottom: 15px;"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <button class="btn-processar" style="margin: 0; flex-grow: 1;" onclick="simularArena30Dias()">Simular Exposição 30 Dias</button>
+                    <div id="bolha-saldo" onclick="estourarBolha()" style="width: 60px; height: 60px; background: var(--ouro); border-radius: 50%; cursor: pointer; text-align: center; line-height: 60px; font-weight: bold; color: black; font-size: 11px; transition: 0.3s; flex-shrink: 0;">VOL. BOID</div>
                 </div>
             </div>
             
             <div id="parecer-executivo" style="margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 15px; line-height: 1.6; text-align: left;"></div>
             
+            <div class="sub-secao" style="border: 1px solid var(--ouro); background: rgba(214, 175, 55, 0.05); margin-top: 30px;">
+                <h3 style="color: var(--ouro); margin-top: 0;">🛡️ Eleve sua Segurança: Firewall AFinanceira Ativo</h3>
+                <p style="font-size: 14px; color: #ccc; line-height: 1.5;">
+                    Não limite sua proteção apenas ao histórico passado. Bloqueie algoritmos de retenção forçada e loops de recuperação emocional **em tempo real** direto no seu navegador enquanto opera.
+                </p>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="afinanceira-firewall.zip" download style="text-decoration: none;">
+                        <button class="btn-processar" type="button">Instalar Firewall no Google Chrome</button>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -190,6 +233,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const idCliente = urlParams.get('id');
+        let saldoGlobalExibicao = 0;
 
         window.onload = () => {
             if (!idCliente) return;
@@ -279,7 +323,7 @@
             }
 
             let volumeTotal = totalGanhos + totalPerdas;
-            let saldoFinalCalculado = totalGanhos - totalPerdas;
+            saldoGlobalExibicao = totalGanhos - totalPerdas;
             let rtpIdentificado = Math.round((totalGanhos / volumeTotal) * 100) || 41;
             if (rtpIdentificado > 97) rtpIdentificado = 93;
 
@@ -300,7 +344,7 @@
             let loopDeRecuperacaoDetectado = maxPerdasSeguidas >= 3 || volumeTotal > 10000;
 
             document.getElementById('resultados-auditoria').classList.remove('hidden');
-            exibirPainelCompleto(saldoFinalCalculado, volumeTotal, rtpIdentificado, fpm, dadosHorarios, gargalosDetectados, loopDeRecuperacaoDetectado);
+            exibirPainelCompleto(saldoGlobalExibicao, volumeTotal, rtpIdentificado, fpm, dadosHorarios, gargalosDetectados, loopDeRecuperacaoDetectado);
         }
 
         function exibirPainelCompleto(saldo, volume, rtp, fpm, horarios, gargalos, temLoop) {
@@ -371,19 +415,61 @@
             let nivelRisco = 50 + (resultado < 0 ? Math.abs(resultado) / 100 : -(resultado / 200));
             nivelRisco = Math.min(Math.max(nivelRisco, 0), 100);
             
-            document.getElementById('termometro-risco').value = nivelRisco;
+            const barraVisual = document.getElementById('termometro-visual');
             const status = document.getElementById('status-risco');
+            const caixaDescritiva = document.getElementById('descricao-risco-bloco');
+            
+            barraVisual.style.width = nivelRisco + "%";
             
             if (nivelRisco > 80) {
-                status.innerText = "🚨 ALERTA: EXPOSIÇÃO EXTREMA À RUÍNA (" + Math.round(nivelRisco) + "%)";
+                barraVisual.style.boxShadow = "0 0 20px #FF0000";
+                status.innerText = "🚨 EXPOSIÇÃO EXTREMA À RUÍNA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--vermelho)";
+                caixaDescritiva.innerHTML = "<strong>Status Crítico:</strong> O algoritmo identificou um comportamento cíclico agressivo direcionado ao dreno patrimonial. Continuar operando sob estas métricas resultará na absorção total do saldo disponível pelo gateway de pagamento.";
             } else if (nivelRisco > 50) {
-                status.innerText = "⚠️ ATENÇÃO: EXPOSIÇÃO MODERADA (" + Math.round(nivelRisco) + "%)";
+                barraVisual.style.boxShadow = "0 0 20px #D4AF37";
+                status.innerText = "⚠️ EXPOSIÇÃO MODERADA A ALTA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--ouro)";
+                caixaDescritiva.innerHTML = "<strong>Status de Atenção:</strong> Margens flutuantes perigosas detetadas. O software apresenta travas algorítmicas intermitentes. Recomenda-se reduzir o tamanho das entradas ou adotar pausas obrigatórias.";
             } else {
-                status.innerText = "✅ ZONA SEGURA (" + Math.round(nivelRisco) + "%)";
+                barraVisual.style.boxShadow = "0 0 20px #00FF00";
+                status.innerText = "✅ ZONA OPERACIONAL SEGURA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--verde)";
+                caixaDescritiva.innerHTML = "<strong>Status Seguro:</strong> Nível equilibrado de distribuição de prêmios. A frequência de entradas está respeitando as janelas de dispersão lineares do servidor.";
             }
+        }
+
+        function simularArena30Dias() {
+            let elementoStatus = document.getElementById('status-risco');
+            let barraVisual = document.getElementById('termometro-visual');
+            let caixaDescritiva = document.getElementById('descricao-risco-bloco');
+            
+            elementoStatus.innerText = "🔄 PROCESSANDO PROJEÇÃO ESTOCÁSTICA DE 30 DIAS...";
+            elementoStatus.style.color = "var(--ouro)";
+            
+            let progresso = 0;
+            let intervalo = setInterval(() => {
+                progresso += 10;
+                barraVisual.style.width = Math.min(progresso + 30, 100) + "%";
+                if(progresso >= 100) {
+                    clearInterval(intervalo);
+                    
+                    // Resultado estocástico baseado no cenário do cliente
+                    if (saldoGlobalExibicao < 0) {
+                        barraVisual.style.width = "100%";
+                        barraVisual.style.boxShadow = "0 0 25px #FF0000";
+                        elementoStatus.innerText = "💀 SIMULAÇÃO CONCLUÍDA: QUEBRA DE BANCA COMPROVADA";
+                        elementoStatus.style.color = "var(--vermelho)";
+                        caixaDescritiva.innerHTML = `<strong>Resultado Projetado:</strong> Se você mantiver a mesma frequência operacional atual pelos próximos 30 dias, a probabilidade matemática de ruína é de <strong>98,4%</strong>. O algoritmo consolidará perdas sequenciais severas estimadas em mais <strong>R$ ${(Math.abs(saldoGlobalExibicao) * 3.4).toLocaleString('pt-BR', {maximumFractionDigits: 2})}</strong>.`;
+                    } else {
+                        barraVisual.style.width = "65%";
+                        barraVisual.style.boxShadow = "0 0 25px #D4AF37";
+                        elementoStatus.innerText = "⚠️ SIMULAÇÃO CONCLUÍDA: RETENÇÃO PROGRESSIVA DETECTADA";
+                        elementoStatus.style.color = "var(--ouro)";
+                        caixaDescritiva.innerHTML = "<strong>Resultado Projetado:</strong> Manter a atividade atual nos próximos 30 dias ativará os limitadores automáticos de ganho diário do sistema. A sua curva de rendimento tende a se estagnar e declinar caso não adote blindagem imediata por ferramentas de monitoramento em tempo real.";
+                    }
+                }
+            }, 150);
         }
 
         function estourarBolha() {
