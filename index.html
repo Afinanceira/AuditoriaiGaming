@@ -12,6 +12,7 @@
     <style>
         :root { --ouro: #D4AF37; --fundo: #0a0a0a; --vermelho: #FF0000; --verde: #00FF00; --cinza: #1a1a1a; --cinza-claro: #2a2a2a; }
         
+        /* Força o body a renderizar o texto de forma normal e direta */
         body { 
             background-color: var(--fundo); 
             color: white; 
@@ -21,8 +22,10 @@
             margin: 0;
             position: relative;
             min-height: 100vh;
+            transform: none !important; /* Impede qualquer inversão herdada */
         }
 
+        /* Camada totalmente isolada para a imagem de fundo */
         body::before {
             content: "";
             position: fixed;
@@ -30,21 +33,37 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.88)), url('background.jpg');
+            background-image: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)), url('background.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            transform: scaleX(-1); 
+            transform: scaleX(-1); /* Espelha APENAS a imagem de fundo */
             z-index: -1; 
         }
 
-        .card { border: 1px solid var(--ouro); padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto; background-color: rgba(13, 13, 13, 0.94); box-shadow: 0px 4px 25px rgba(212, 175, 55, 0.15); backdrop-filter: blur(5px); }
+        /* Estrutura dos Cards de Conteúdo (Garante leitura normal) */
+        .card { 
+            direction: ltr !important;
+            unicode-bidi: isolate;
+            text-align: center;
+            border: 1px solid var(--ouro); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            max-width: 900px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            background-color: rgba(13, 13, 13, 0.96); 
+            box-shadow: 0px 4px 25px rgba(212, 175, 55, 0.15); 
+            backdrop-filter: blur(5px); 
+        }
+        
         .hidden { display: none; }
         .btn-processar { background: var(--ouro); color: black; padding: 15px 30px; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; font-size: 16px; transition: 0.3s; margin: 10px; }
         .btn-processar:hover { opacity: 0.8; }
         
         .kpi-container { display: flex; justify-content: space-around; margin: 20px 0; flex-wrap: wrap; }
-        .kpi-box { background: var(--cinza); border: 1px solid var(--ouro); padding: 15px; border-radius: 8px; min-width: 180px; margin: 5px; }
+        .kpi-box { background: var(--cinza); border: 1px solid var(--ouro); padding: 15px; border-radius: 8px; min-width: 180px; margin: 5px; text-align: center; }
         
         .sub-secao { background: var(--cinza); border: 1px solid #333; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
         .gargalo-item { background: var(--cinza-claro); border-left: 4px solid var(--vermelho); padding: 12px; margin: 8px 0; border-radius: 4px; font-size: 14px; }
@@ -55,7 +74,7 @@
         .rtp-barra-bg { background: #333; width: 55%; height: 20px; border-radius: 10px; overflow: hidden; position: relative; }
         .rtp-barra-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
 
-        /* Customização Avançada do Termômetro de Risco */
+        /* Termômetro Customizado */
         .medidor-container {
             background: #222;
             border-radius: 15px;
@@ -159,7 +178,6 @@
 
             <div class="sub-secao">
                 <h3 style="margin-top: 0; color: var(--ouro);">🕒 Cronoanálise Forense (Janelas de Performance)</h3>
-                <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Cruzamento estatístico entre carimbos de data/hora do PDF e o comportamento do fluxo do servidor:</p>
                 <div id="analise-horarios"></div>
             </div>
 
@@ -177,7 +195,6 @@
 
             <div class="sub-secao" style="border-color: var(--ouro); background: rgba(20, 20, 20, 0.8);">
                 <h3 style="margin-top: 0; color: var(--ouro);">🎮 Cenário de Exposição Estatística (Termômetro Dinâmico)</h3>
-                <p style="margin-top: 0; font-size: 14px; color: #aaa;">Mapeamento do nível de estresse patrimonial em relação à arquitetura de retenção do servidor:</p>
                 
                 <div class="medidor-container">
                     <div id="termometro-visual" class="medidor-barra"></div>
@@ -189,7 +206,6 @@
                 </div>
 
                 <p id="status-risco" style="font-weight: bold; font-size: 16px; margin: 15px 0; text-align: center; letter-spacing: 0.5px;"></p>
-                
                 <div id="descricao-risco-bloco" style="background: var(--cinza-claro); padding: 12px; border-radius: 6px; font-size: 13px; color: #bbb; line-height: 1.4; margin-bottom: 15px;"></div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -203,7 +219,7 @@
             <div class="sub-secao" style="border: 1px solid var(--ouro); background: rgba(214, 175, 55, 0.05); margin-top: 30px;">
                 <h3 style="color: var(--ouro); margin-top: 0;">🛡️ Eleve sua Segurança: Firewall AFinanceira Ativo</h3>
                 <p style="font-size: 14px; color: #ccc; line-height: 1.5;">
-                    Não limite sua proteção apenas ao histórico passado. Bloqueie algoritmos de retenção forçada e loops de recuperação emocional **em tempo real** direto no seu navegador enquanto opera.
+                    Bloqueie algoritmos de retenção forçada e loops de recuperação emocional **em tempo real** direto no seu navegador enquanto opera.
                 </p>
                 <div style="text-align: center; margin-top: 15px;">
                     <a href="afinanceira-firewall.zip" download style="text-decoration: none;">
@@ -218,7 +234,6 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
 
-        // CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAN-8KC8_WjptE6v6TzuNGdIxpGOIG8vpQ",
             authDomain: "auditoriaigaming.firebaseapp.com",
@@ -330,15 +345,15 @@
             let fpm = (operacoesCount / 12).toFixed(1);
 
             let dadosHorarios = {
-                criticos: ["01:00 às 04:30 (Madrugada) - Pico de retenção estática mapeada no servidor.", "12:00 às 13:30 (Almoço) - Alta saturação de usuários dispersando prêmios."],
-                favoraveis: ["07:00 às 09:15 (Manhã) - Ciclo de reinicialização e menor índice de travas ativas.", "18:00 às 19:00 (Início da noite) - Distribuição linear de variância."]
+                criticos: ["01:00 às 04:30 (Madrugada) - Pico de retenção estática mapeada no servidor.", "12:00 às 13:30 (Almoço) - Alta saturação de usuários."],
+                favoraveis: ["07:00 às 09:15 (Manhã) - Menor índice de travas ativas.", "18:00 às 19:00 (Início da noite) - Distribuição linear."]
             };
 
             let gargalosDetectados = [
                 "Vulnerabilidade identificada na frequência operacional em janelas de absorção contínua.",
-                `Micro-recuperações frustradas gerando dreno em cascata (Maior sequência desfavorável: ${maxPerdasSeguidas} perdas seguidas).`,
+                `Micro-recuperações frustradas (Maior sequência desfavorável: ${maxPerdasSeguidas} perdas).`,
                 "Ausência de dispersão matemática de riscos nos momentos de alta volatilidade do software.",
-                "Taxa de ações por minuto acima da média recomendada de segurança de patrimônio."
+                "Taxa de ações por minuto acima da média recomendada de segurança."
             ];
 
             let loopDeRecuperacaoDetectado = maxPerdasSeguidas >= 3 || volumeTotal > 10000;
@@ -361,12 +376,12 @@
             barraReal.style.width = rtp + "%";
             barraReal.style.background = rtp < 70 ? "var(--vermelho)" : "var(--verde)";
             document.getElementById('txt-rtp-real').innerText = rtp + "%";
-            document.getElementById('alerta-rtp-texto').innerHTML = `<strong>Dano Verificado de Retenção:</strong> O software reteve expressivos <strong>${96 - rtp}%</strong> acima do teto regulamentado. Isso significa que a cada ciclo de movimentação, o sistema central puxou o capital de maneira desproporcional à média estatística padrão.`;
+            document.getElementById('alerta-rtp-texto').innerHTML = `<strong>Dano Verificado de Retenção:</strong> O software reteve expressivos <strong>${96 - rtp}%</strong> acima do teto regulamentado.`;
 
             const painelLoop = document.getElementById('modulo-loop-recuperacao');
             if (temLoop && saldo < 0) {
                 painelLoop.classList.remove('hidden');
-                document.getElementById('detalhe-loop-recuperacao').innerHTML = `<strong>Risco Comportamental Mapeado:</strong> Detectamos gatilhos de reentrada mecânica após perdas severas. O software mapeia a elevação da sua frequência operacional e calibra os algoritmos de dispersão para o nível mínimo, sabendo que haverá novas tentativas de cobertura de saldo.`;
+                document.getElementById('detalhe-loop-recuperacao').innerHTML = `<strong>Risco Comportamental Mapeado:</strong> Detectamos gatilhos de reentrada mecânica após perdas severas.`;
             } else {
                 painelLoop.classList.add('hidden');
             }
@@ -385,25 +400,16 @@
             if (saldo < 0) {
                 parecerDiv.style.backgroundColor = "rgba(255, 0, 0, 0.08)";
                 parecerDiv.style.borderLeft = "5px solid var(--vermelho)";
-                parecerDiv.style.color = "white";
                 parecerDiv.innerHTML = `
                     <h3 style="color: var(--vermelho); margin-top: 0;">📋 PARECER TÉCNICO EXECUTIVO: NÃO PROCEDER</h3>
-                    <p><strong>Diagnóstico Final:</strong> Os dados consolidados indicam um ambiente de alta predação patrimonial estruturado pela engenharia do software. Não há viabilidade matemática de continuidade sob as configurações atuais do seu perfil.</p>
-                    <p><strong>Suposições e Recomendações de Como Proceder:</strong></p>
-                    <ul>
-                        <li>Interrompa imediatamente qualquer movimentação financeira nas próximas 48 horas para quebrar o rastreamento de IP e cache comportamental do sistema.</li>
-                        <li>Substitua os horários de operação identificados na zona crítica pelas janelas recomendadas do turno da manhã.</li>
-                        <li>Zere o uso de técnicas de aumento progressivo de aporte (Martingale), focando estritamente em fixação de teto fixo de capital líquido.</li>
-                    </ul>
+                    <p>Os dados consolidados indicam um ambiente de alta predação patrimonial estruturado pela engenharia do software.</p>
                 `;
             } else {
                 parecerDiv.style.backgroundColor = "rgba(0, 255, 0, 0.08)";
                 parecerDiv.style.borderLeft = "5px solid var(--verde)";
-                parecerDiv.style.color = "white";
                 parecerDiv.innerHTML = `
                     <h3 style="color: var(--verde); margin-top: 0;">📋 PARECER TÉCNICO EXECUTIVO: PROCEDER COM CAUTELA</h3>
-                    <p><strong>Diagnóstico Final:</strong> Sua banca demonstra resiliência matemática e aproveitamento real das janelas estatísticas de devolução do sistema.</p>
-                    <p><strong>Direcionamento Estratégico:</strong> Mantenha a disciplina de teto fixo, evite ultrapassar 15 minutos contínuos dentro da ferramenta e realize saques fracionados para não disparar os alertas de recolhimento automático da plataforma.</p>
+                    <p>Sua banca demonstra resiliência matemática e aproveitamento das janelas estatísticas.</p>
                 `;
             }
 
@@ -425,17 +431,17 @@
                 barraVisual.style.boxShadow = "0 0 20px #FF0000";
                 status.innerText = "🚨 EXPOSIÇÃO EXTREMA À RUÍNA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--vermelho)";
-                caixaDescritiva.innerHTML = "<strong>Status Crítico:</strong> O algoritmo identificou um comportamento cíclico agressivo direcionado ao dreno patrimonial. Continuar operando sob estas métricas resultará na absorção total do saldo disponível pelo gateway de pagamento.";
+                caixaDescritiva.innerHTML = "<strong>Status Crítico:</strong> O algoritmo identificou alto estresse na conta. Continuar operando sob estas métricas resultará na absorção total do saldo disponível.";
             } else if (nivelRisco > 50) {
                 barraVisual.style.boxShadow = "0 0 20px #D4AF37";
                 status.innerText = "⚠️ EXPOSIÇÃO MODERADA A ALTA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--ouro)";
-                caixaDescritiva.innerHTML = "<strong>Status de Atenção:</strong> Margens flutuantes perigosas detetadas. O software apresenta travas algorítmicas intermitentes. Recomenda-se reduzir o tamanho das entradas ou adotar pausas obrigatórias.";
+                caixaDescritiva.innerHTML = "<strong>Status de Atenção:</strong> Margens flutuantes perigosas detectadas. Recomenda-se reduzir o tamanho das entradas ou adotar pausas obrigatórias.";
             } else {
                 barraVisual.style.boxShadow = "0 0 20px #00FF00";
                 status.innerText = "✅ ZONA OPERACIONAL SEGURA (" + Math.round(nivelRisco) + "%)";
                 status.style.color = "var(--verde)";
-                caixaDescritiva.innerHTML = "<strong>Status Seguro:</strong> Nível equilibrado de distribuição de prêmios. A frequência de entradas está respeitando as janelas de dispersão lineares do servidor.";
+                caixaDescritiva.innerHTML = "<strong>Status Seguro:</strong> Nível equilibrado de distribuição. A frequência de entradas está dentro dos parâmetros ideais.";
             }
         }
 
@@ -454,19 +460,18 @@
                 if(progresso >= 100) {
                     clearInterval(intervalo);
                     
-                    // Resultado estocástico baseado no cenário do cliente
                     if (saldoGlobalExibicao < 0) {
                         barraVisual.style.width = "100%";
                         barraVisual.style.boxShadow = "0 0 25px #FF0000";
                         elementoStatus.innerText = "💀 SIMULAÇÃO CONCLUÍDA: QUEBRA DE BANCA COMPROVADA";
                         elementoStatus.style.color = "var(--vermelho)";
-                        caixaDescritiva.innerHTML = `<strong>Resultado Projetado:</strong> Se você mantiver a mesma frequência operacional atual pelos próximos 30 dias, a probabilidade matemática de ruína é de <strong>98,4%</strong>. O algoritmo consolidará perdas sequenciais severas estimadas em mais <strong>R$ ${(Math.abs(saldoGlobalExibicao) * 3.4).toLocaleString('pt-BR', {maximumFractionDigits: 2})}</strong>.`;
+                        caixaDescritiva.innerHTML = `<strong>Resultado Projetado:</strong> Probabilidade matemática de ruína em 30 dias é de <strong>98,4%</strong>.`;
                     } else {
                         barraVisual.style.width = "65%";
                         barraVisual.style.boxShadow = "0 0 25px #D4AF37";
                         elementoStatus.innerText = "⚠️ SIMULAÇÃO CONCLUÍDA: RETENÇÃO PROGRESSIVA DETECTADA";
                         elementoStatus.style.color = "var(--ouro)";
-                        caixaDescritiva.innerHTML = "<strong>Resultado Projetado:</strong> Manter a atividade atual nos próximos 30 dias ativará os limitadores automáticos de ganho diário do sistema. A sua curva de rendimento tende a se estagnar e declinar caso não adote blindagem imediata por ferramentas de monitoramento em tempo real.";
+                        caixaDescritiva.innerHTML = "<strong>Resultado Projetado:</strong> Manter a atividade atual nos próximos 30 dias ativará os limitadores automáticos de ganho diário.";
                     }
                 }
             }, 150);
@@ -489,9 +494,9 @@
             meuGrafico = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Semana 1 (Entrada)', 'Semana 2 (Rastreio)', 'Semana 3 (Retenção)', 'Diagnóstico Computacional Atual'],
+                    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Atual'],
                     datasets: [{
-                        label: 'Curva Patrimonial da Banca (R$)',
+                        label: 'Curva Patrimonial (R$)',
                         data: dadosMapeados,
                         borderColor: '#D4AF37',
                         backgroundColor: 'rgba(212, 175, 55, 0.08)',
